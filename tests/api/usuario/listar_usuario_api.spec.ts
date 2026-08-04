@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
 
-test.describe("Usuario API Tests", () => {
+test.describe("Listar Usuario API Tests", () => {
   let userIDs: string[] = [];
 
   let userEmail = "";

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
 
-test.describe("Usuario API Tests", () => {
+test.describe("Delete usuario API Tests", () => {
   test("should delete user with success", async ({ request }) => {
     const randonName = faker.person.fullName();
     const randomEmail = faker.internet.email();
