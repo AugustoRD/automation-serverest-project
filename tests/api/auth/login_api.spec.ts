@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 test.describe("Login API Tests", () => {
   let userIDs: string[] = [];
 
-  //let userEmail: string;
+  //let userEmail: string = "";
   let userEmail = "";
   let userPassword = "";
 
@@ -18,12 +18,12 @@ test.describe("Login API Tests", () => {
 
   test.beforeEach(async ({ request }) => {
     // Setup new user
-    const randonName = faker.person.fullName();
+    const randomName = faker.person.fullName();
     userEmail = faker.internet.email();
     userPassword = faker.internet.password();
 
     const newUser = {
-      nome: randonName,
+      nome: randomName,
       email: userEmail,
       password: userPassword,
       administrador: "true",
@@ -64,6 +64,26 @@ test.describe("Login API Tests", () => {
     const loginData = {
       email: emailNotRegistered,
       password: userPassword,
+    };
+
+    const response = await request.post("/login", {
+      data: loginData,
+    });
+
+    expect(response.status()).toBe(401);
+
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty(
+      "message",
+      "Email e/ou senha inválidos",
+    );
+  });
+
+  test("should fail login with wrong password", async ({ request }) => {
+    const wrongPassword = faker.internet.password();
+    const loginData = {
+      email: userEmail,
+      password: wrongPassword,
     };
 
     const response = await request.post("/login", {
