@@ -33,6 +33,38 @@ test.describe("Usuários API Tests", () => {
 
       userIDs.push(responseBody._id);
     });
+
+    test("should create a new user with client role successfully", async () => {
+      const newUser = new UsuarioBuilder().withAdministrador("false").build();
+      const response = await usuarioController.criarUsuario(newUser);
+
+      expect(response.status()).toBe(201);
+      const responseBody = await response.json();
+
+      expect(responseBody).toHaveProperty(
+        "message",
+        "Cadastro realizado com sucesso",
+      );
+      expect(responseBody).toHaveProperty("_id");
+
+      userIDs.push(responseBody._id);
+    });
+
+    test("should not create a new user with the same email", async () => {
+      const newUser = new UsuarioBuilder().build();
+      const response = await usuarioController.criarUsuario(newUser);
+      const responseBody = await response.json();
+      expect(response.status()).toBe(201);
+      userIDs.push(responseBody._id);
+
+      const responseDuplicate = await usuarioController.criarUsuario(newUser);
+      const responseBodyDuplicate = await responseDuplicate.json();
+      expect(responseDuplicate.status()).toBe(400);
+      expect(responseBodyDuplicate).toHaveProperty(
+        "message",
+        "Este email já está sendo usado",
+      );
+    });
   });
 
   test.describe("Cenários de Edição", () => {
