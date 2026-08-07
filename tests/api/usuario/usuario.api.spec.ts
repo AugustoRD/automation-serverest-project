@@ -74,10 +74,7 @@ test.describe("Usuários API Tests", () => {
 
   test.describe("Cenários de Edição", () => {
     test("should edit a user successfully", async () => {
-      const newUser = new UsuarioBuilder().build();
-      const postResponse = await usuarioController.criarUsuario(newUser);
-      const { _id } = await postResponse.json();
-      userIDs.push(_id);
+      const newUser = await setupHelper.criarUsuario("true");
 
       const dadosEditados = new UsuarioBuilder()
         .withEmail(newUser.email)
@@ -85,7 +82,7 @@ test.describe("Usuários API Tests", () => {
         .build();
 
       const putResponse = await usuarioController.editarUsuario(
-        _id,
+        newUser.id,
         dadosEditados,
       );
       expect(putResponse.status()).toBe(200);
@@ -93,11 +90,53 @@ test.describe("Usuários API Tests", () => {
         "message",
         "Registro alterado com sucesso",
       );
-
-      const getResponse = await usuarioController.buscarUsuarioPorId(_id);
+      const getResponse = await usuarioController.buscarUsuarioPorId(
+        newUser.id,
+      );
       const bodyGet = await getResponse.json();
 
       expect(bodyGet).toHaveProperty("nome", "Augusto Editado");
+    });
+
+    test("should create a new user when sending invalid id for put", async () => {
+      const invalidId = faker.string.alphanumeric(16);
+
+      const dadosEditados = new UsuarioBuilder()
+        // .withEmail(newUser.email)
+        .withNome("Augusto Editado")
+        .build();
+
+      const putResponse = await usuarioController.editarUsuario(
+        invalidId,
+        dadosEditados,
+      );
+      expect(putResponse.status()).toBe(201);
+      expect(await putResponse.json()).toHaveProperty(
+        "message",
+        "Cadastro realizado com sucesso",
+      );
+    });
+
+    test("should not edit user when email already exists", async ({
+      request,
+    }) => {
+      const newUser = await setupHelper.criarUsuario("true");
+      const invalidId = faker.string.alphanumeric(16);
+
+      const dadosEditados = new UsuarioBuilder()
+        .withEmail(newUser.email)
+        .withNome("Augusto Editado")
+        .build();
+
+      const response = await usuarioController.editarUsuario(
+        invalidId,
+        dadosEditados,
+      );
+
+      expect(response.status()).toBe(400);
+
+      const body = await response.json();
+      expect(body).toHaveProperty("message", "Este email já está sendo usado");
     });
   });
 
