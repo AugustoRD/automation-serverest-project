@@ -13,6 +13,20 @@ export class UsuarioController {
     return await this.request.get(this.BASE_URL);
   }
 
+  async listarUsuariosComQueryParams(params: {
+    [key: string]: string;
+  }): Promise<APIResponse> {
+    return await this.request.get(this.BASE_URL, {
+      params: params,
+    });
+  }
+
+  //async listarUsuariosComQueryParams(
+  //  queryParams: string,
+  //): Promise<APIResponse> {
+  //  return await this.request.get(`${this.BASE_URL}?${queryParams}`);
+  //}
+
   async buscarUsuarioPorId(id: string): Promise<APIResponse> {
     return await this.request.get(`${this.BASE_URL}/${id}`);
   }

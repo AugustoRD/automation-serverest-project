@@ -1,16 +1,21 @@
 import { test, expect } from "@playwright/test";
 import { UsuarioBuilder } from "../../../src/builders/usuario.builder";
 import { UsuarioController } from "../../../src/controllers/usuario.controller";
+import { SetupHelper } from "../../../src/helpers/setup.helper";
+import { faker } from "@faker-js/faker";
 
 test.describe("Usuários API Tests", () => {
   let usuarioController: UsuarioController;
+  let setupHelper: SetupHelper;
   let userIDs: string[] = [];
 
   test.beforeEach(async ({ request }) => {
     usuarioController = new UsuarioController(request);
+    setupHelper = new SetupHelper(request);
   });
 
   test.afterEach(async () => {
+    await setupHelper.limparDadosGerados();
     for (const id of userIDs) {
       await usuarioController.deletarUsuario(id);
     }
@@ -96,7 +101,58 @@ test.describe("Usuários API Tests", () => {
     });
   });
 
-  test.describe("Cenários de Listagem", () => {});
+  test.describe("Cenários de Listagem", () => {
+    test("should list all users successfully", async () => {
+      const newUser = await setupHelper.criarUsuario("true");
+      //expect(newUser.status()).toBe(201);
+      const newUser2 = await setupHelper.criarUsuario("true");
+
+      const response = await usuarioController.listarUsuarios();
+      const body = await response.json();
+
+      expect(response.status()).toBe(200);
+      expect(body.usuarios).toBeInstanceOf(Array);
+      //expect(body.length).toBe(2);
+      //expect(body.usuarios).toHaveProperty("[0].nome", newUser.nome);
+    });
+
+    test("should list user with query parameter", async () => {
+      const newUser = await setupHelper.criarUsuario("true");
+
+      //const response = await usuarioController.listarUsuariosComQueryParams(
+      //  `email=${newUser.email}`,
+      // );
+
+      const response = await usuarioController.listarUsuariosComQueryParams({
+        email: newUser.email,
+      });
+      const body = await response.json();
+
+      expect(response.status()).toBe(200);
+      expect(body.usuarios).toBeInstanceOf(Array);
+      expect(body.usuarios[0]).toHaveProperty("email", newUser.email);
+    });
+
+    test("should list user with path parameter", async () => {
+      const newUser = await setupHelper.criarUsuario("true");
+
+      const response = await usuarioController.buscarUsuarioPorId(newUser.id);
+      const body = await response.json();
+
+      expect(response.status()).toBe(200);
+      expect(body).toHaveProperty("email", newUser.email);
+    });
+
+    test("shouldn't list user with invalid id", async () => {
+      const invalidID = faker.string.alphanumeric(16);
+
+      const response = await usuarioController.buscarUsuarioPorId(invalidID);
+      const body = await response.json();
+
+      expect(response.status()).toBe(400);
+      expect(body).toHaveProperty("message", "Usuário não encontrado");
+    });
+  });
 
   test.describe("Cenários de Exclusão", () => {});
 });
