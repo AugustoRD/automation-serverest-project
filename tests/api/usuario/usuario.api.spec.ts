@@ -193,5 +193,33 @@ test.describe("Usuários API Tests", () => {
     });
   });
 
-  test.describe("Cenários de Exclusão", () => {});
+  test.describe("Cenários de Exclusão", () => {
+    test("should delete user with success", async ({}) => {
+      const newUser = await setupHelper.criarUsuario("true");
+
+      const response = await usuarioController.deletarUsuario(newUser.id);
+
+      expect(response.status()).toBe(200);
+
+      expect(await response.json()).toHaveProperty(
+        "message",
+        "Registro excluído com sucesso",
+      );
+    });
+
+    test("should not delete user with invalid id", async ({}) => {
+      //const newUser = await setupHelper.criarUsuario("true");
+
+      const invalidID = faker.string.alphanumeric(16);
+
+      const response = await usuarioController.deletarUsuario(invalidID);
+
+      expect(response.status()).toBe(200);
+
+      expect(await response.json()).toHaveProperty(
+        "message",
+        "Nenhum registro excluído",
+      );
+    });
+  });
 });
