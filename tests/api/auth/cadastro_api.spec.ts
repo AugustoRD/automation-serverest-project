@@ -93,7 +93,6 @@ test.describe('Cadastro API Tests', () => {
 
         const responseBody2 = await response2.json();
 
-        userIDs.push(responseBody2._id);
         expect(responseBody2).toHaveProperty('message', 'Este email já está sendo usado');
 
     });
