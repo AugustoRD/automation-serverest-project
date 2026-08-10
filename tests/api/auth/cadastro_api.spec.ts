@@ -15,11 +15,11 @@ test.describe('Cadastro API Tests', () => {
 
     test('should create a new user with admin role', async ({ request }) => {
 
-        const randonName = faker.person.fullName();
+        const randomName = faker.person.fullName();
         const randomEmail = faker.internet.email();
 
         const newUser = {
-            nome: randonName,
+            nome: randomName,
             email: randomEmail,
             password: '123456',
             administrador: 'true'
