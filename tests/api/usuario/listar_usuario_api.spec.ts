@@ -47,6 +47,7 @@ test.describe("Listar Usuario API Tests", () => {
     expect(users.usuarios).toBeInstanceOf(Array);
     expect(users.usuarios.length).toBeGreaterThan(0);
     expect(users.usuarios[0]).toHaveProperty("nome");
+  });
 
   test("should list user with query parameters", async ({ request }) => {
     const response = await request.get("/usuarios?email=" + userEmail);
