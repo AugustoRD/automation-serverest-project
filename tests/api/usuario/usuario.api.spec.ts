@@ -76,14 +76,14 @@ test.describe("Usuários API Tests", () => {
     test("should edit a user successfully", async () => {
       const newUser = await setupHelper.criarUsuario("true");
 
-      const dadosEditados = new UsuarioBuilder()
+      const editadedUser = new UsuarioBuilder()
         .withEmail(newUser.email)
         .withNome("Augusto Editado")
         .build();
 
       const putResponse = await usuarioController.editarUsuario(
         newUser.id,
-        dadosEditados,
+        editadedUser,
       );
       expect(putResponse.status()).toBe(200);
       expect(await putResponse.json()).toHaveProperty(
@@ -101,14 +101,14 @@ test.describe("Usuários API Tests", () => {
     test("should create a new user when sending invalid id for put", async () => {
       const invalidId = faker.string.alphanumeric(16);
 
-      const dadosEditados = new UsuarioBuilder()
+      const editadedUser = new UsuarioBuilder()
         // .withEmail(newUser.email)
         .withNome("Augusto Editado")
         .build();
 
       const putResponse = await usuarioController.editarUsuario(
         invalidId,
-        dadosEditados,
+        editadedUser,
       );
       expect(putResponse.status()).toBe(201);
       expect(await putResponse.json()).toHaveProperty(
@@ -123,14 +123,14 @@ test.describe("Usuários API Tests", () => {
       const newUser = await setupHelper.criarUsuario("true");
       const invalidId = faker.string.alphanumeric(16);
 
-      const dadosEditados = new UsuarioBuilder()
+      const editadedUser = new UsuarioBuilder()
         .withEmail(newUser.email)
         .withNome("Augusto Editado")
         .build();
 
       const response = await usuarioController.editarUsuario(
         invalidId,
-        dadosEditados,
+        editadedUser,
       );
 
       expect(response.status()).toBe(400);
