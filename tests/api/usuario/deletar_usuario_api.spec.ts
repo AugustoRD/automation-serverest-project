@@ -3,12 +3,12 @@ import { faker } from "@faker-js/faker";
 
 test.describe("Delete usuario API Tests", () => {
   test("should delete user with success", async ({ request }) => {
-    const randonName = faker.person.fullName();
+    const randomName = faker.person.fullName();
     const randomEmail = faker.internet.email();
 
-    //setup new user
+    // Setup new user
     const newUser = {
-      nome: randonName,
+      nome: randomName,
       email: randomEmail,
       password: "123456",
       administrador: "true",
