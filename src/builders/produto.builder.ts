@@ -7,7 +7,7 @@ export class ProdutoBuilder {
   constructor() {
     this.produto = {
       nome: faker.commerce.productName(),
-      preco: parseFloat(faker.commerce.price()),
+      preco: parseInt(faker.commerce.price()),
       descricao: faker.commerce.productDescription(),
       quantidade: faker.number.int({ min: 1, max: 100 }),
     };

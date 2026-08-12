@@ -9,8 +9,11 @@ export class ProdutoController {
     this.request = request;
   }
 
-  async criarProduto(payload: Produto): Promise<APIResponse> {
+  async criarProduto(payload: Produto, token: string): Promise<APIResponse> {
     return await this.request.post(this.BASE_URL, {
+      headers: {
+        authorization: token,
+      },
       data: payload,
     });
   }
