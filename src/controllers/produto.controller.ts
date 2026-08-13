@@ -17,4 +17,20 @@ export class ProdutoController {
       data: payload,
     });
   }
+
+  async listarProdutos(): Promise<APIResponse> {
+    return await this.request.get(this.BASE_URL);
+  }
+
+  async listarProdutosComQueryParams(params: {
+    [key: string]: string;
+  }): Promise<APIResponse> {
+    return await this.request.get(this.BASE_URL, {
+      params: params,
+    });
+  }
+
+  async buscarProdutoPorId(id: string): Promise<APIResponse> {
+    return await this.request.get(`${this.BASE_URL}/${id}`);
+  }
 }
