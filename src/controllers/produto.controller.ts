@@ -33,4 +33,12 @@ export class ProdutoController {
   async buscarProdutoPorId(id: string): Promise<APIResponse> {
     return await this.request.get(`${this.BASE_URL}/${id}`);
   }
+
+  async deletarProduto(id: string, token: string): Promise<APIResponse> {
+    return await this.request.delete(`${this.BASE_URL}/${id}`, {
+      headers: {
+        authorization: token,
+      },
+    });
+  }
 }

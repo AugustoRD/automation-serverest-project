@@ -7,7 +7,6 @@ import { faker } from "@faker-js/faker";
 test.describe("Usuários API Tests", () => {
   let usuarioController: UsuarioController;
   let setupHelper: SetupHelper;
-  let userIDs: string[] = [];
 
   test.beforeEach(async ({ request }) => {
     usuarioController = new UsuarioController(request);
@@ -16,10 +15,6 @@ test.describe("Usuários API Tests", () => {
 
   test.afterEach(async () => {
     await setupHelper.limparDadosGerados();
-    for (const id of userIDs) {
-      await usuarioController.deletarUsuario(id);
-    }
-    userIDs = [];
   });
 
   test.describe("Cadastro API tests", () => {
@@ -36,7 +31,7 @@ test.describe("Usuários API Tests", () => {
       );
       expect(responseBody).toHaveProperty("_id");
 
-      userIDs.push(responseBody._id);
+      setupHelper.adicionarUsuarioId(responseBody._id);
     });
 
     test("should create a new user with client role successfully", async () => {
@@ -52,7 +47,7 @@ test.describe("Usuários API Tests", () => {
       );
       expect(responseBody).toHaveProperty("_id");
 
-      userIDs.push(responseBody._id);
+      setupHelper.adicionarUsuarioId(responseBody._id);
     });
 
     test("should not create a new user with the same email", async () => {
@@ -60,7 +55,7 @@ test.describe("Usuários API Tests", () => {
       const response = await usuarioController.criarUsuario(newUser);
       const responseBody = await response.json();
       expect(response.status()).toBe(201);
-      userIDs.push(responseBody._id);
+      setupHelper.adicionarUsuarioId(responseBody._id);
 
       const responseDuplicate = await usuarioController.criarUsuario(newUser);
       const responseBodyDuplicate = await responseDuplicate.json();
@@ -111,10 +106,13 @@ test.describe("Usuários API Tests", () => {
         editadedUser,
       );
       expect(putResponse.status()).toBe(201);
-      expect(await putResponse.json()).toHaveProperty(
+      const putBody = await putResponse.json();
+      expect(putBody).toHaveProperty(
         "message",
         "Cadastro realizado com sucesso",
       );
+
+      setupHelper.adicionarUsuarioId(putBody._id);
     });
 
     test("should not edit user when email already exists", async ({

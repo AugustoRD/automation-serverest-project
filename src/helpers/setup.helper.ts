@@ -39,10 +39,24 @@ export class SetupHelper {
     };
   }
 
+  public adicionarUsuarioId(id: string) {
+    this.userIDs.push(id);
+  }
+
   async limparDadosGerados() {
     for (const id of this.userIDs) {
       await this.usuarioController.deletarUsuario(id);
     }
     this.userIDs = [];
+  }
+
+  async limparProdutosGerados(produtoController: any, token: string) {
+    const response = await produtoController.listarProdutos();
+    const produtos = await response.json();
+
+    for (const produto of produtos) {
+      await produtoController.deletarProduto(produto._id, token);
+    }
+    // this.produtoIDs = [];
   }
 }
