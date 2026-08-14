@@ -242,6 +242,148 @@ test.describe("Produtos API Tests", () => {
   });
 
   test.describe("Cenários de Edição", () => {
-    test("should edit product successfully", async () => {});
+    test("should edit product successfully", async () => {
+      const newProduct = new ProdutoBuilder().build();
+      const createResponse = await produtoController.criarProduto(
+        newProduct,
+        admToken,
+      );
+      const productId = (await createResponse.json())._id;
+
+      setupHelper.adicionarProdutoId(productId);
+
+      //const updatedProduct: Produto = {
+      //  nome: "Produto Atualizado",
+      // preco: 99,
+      //descricao: "Descrição atualizada do produto",
+      // quantidade: 50,
+      // };
+      const updatedProduct: Produto = {
+        ...newProduct,
+        nome: faker.commerce.productName(),
+        descricao: faker.commerce.productDescription(),
+        preco: 150,
+      };
+
+      const response = await produtoController.editarProduto(
+        productId,
+        updatedProduct,
+        admToken,
+      );
+      test.expect(response.status()).toBe(200);
+      test
+        .expect(await response.json())
+        .toHaveProperty("message", "Registro alterado com sucesso");
+    });
+
+    test("should create a new product when sending invalid id for put", async () => {
+      const invalidId = faker.string.alphanumeric(16);
+
+      const updatedProduct = new ProdutoBuilder().build();
+
+      const response = await produtoController.editarProduto(
+        invalidId,
+        updatedProduct,
+        admToken,
+      );
+      test.expect(response.status()).toBe(201);
+      const responseBody = await response.json();
+      test
+        .expect(responseBody)
+        .toHaveProperty("message", "Cadastro realizado com sucesso");
+
+      setupHelper.adicionarProdutoId(responseBody._id);
+    });
+
+    test("should not edit product when name already exists", async () => {
+      const newProduct1 = new ProdutoBuilder().build();
+      const createResponse1 = await produtoController.criarProduto(
+        newProduct1,
+        admToken,
+      );
+      const productId1 = (await createResponse1.json())._id;
+      setupHelper.adicionarProdutoId(productId1);
+
+      const newProduct2 = new ProdutoBuilder().build();
+      const createResponse2 = await produtoController.criarProduto(
+        newProduct2,
+        admToken,
+      );
+      const productId2 = (await createResponse2.json())._id;
+      setupHelper.adicionarProdutoId(productId2);
+
+      const updatedProduct: Produto = {
+        ...newProduct2,
+        nome: newProduct1.nome,
+      };
+
+      const response = await produtoController.editarProduto(
+        productId2,
+        updatedProduct,
+        admToken,
+      );
+      test.expect(response.status()).toBe(400);
+      test
+        .expect(await response.json())
+        .toHaveProperty("message", "Já existe produto com esse nome");
+    });
+
+    test("should not edit product with a client token", async () => {
+      const { token: clientToken } =
+        await setupHelper.criarUsuarioELogar("false");
+
+      const newProduct = new ProdutoBuilder().build();
+      const createResponse = await produtoController.criarProduto(
+        newProduct,
+        admToken,
+      );
+      const productId = (await createResponse.json())._id;
+
+      setupHelper.adicionarProdutoId(productId);
+
+      const updatedProduct: Produto = {
+        ...newProduct,
+        nome: faker.commerce.productName(),
+      };
+
+      const response = await produtoController.editarProduto(
+        productId,
+        updatedProduct,
+        clientToken,
+      );
+      test.expect(response.status()).toBe(403);
+      test
+        .expect(await response.json())
+        .toHaveProperty("message", "Rota exclusiva para administradores");
+    });
+
+    test("should not edit product without a token", async () => {
+      const newProduct = new ProdutoBuilder().build();
+      const createResponse = await produtoController.criarProduto(
+        newProduct,
+        admToken,
+      );
+      const productId = (await createResponse.json())._id;
+
+      setupHelper.adicionarProdutoId(productId);
+
+      const updatedProduct: Produto = {
+        ...newProduct,
+        nome: faker.commerce.productName(),
+      };
+
+      const response = await produtoController.editarProduto(
+        productId,
+        updatedProduct,
+        "",
+      );
+      test.expect(response.status()).toBe(401);
+      test
+        .expect(await response.json())
+        .toHaveProperty(
+          "message",
+          "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais",
+        );
+    });
   });
 });
