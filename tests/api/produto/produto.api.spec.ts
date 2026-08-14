@@ -17,6 +17,10 @@ test.describe("Produtos API Tests", () => {
     ({ token: admToken } = await setupHelper.criarUsuarioELogar("true"));
   });
 
+  test.afterEach(async () => {
+    await setupHelper.limparDadosGerados(admToken);
+  });
+
   test.describe("Cadastro de produtos", () => {
     test("should create a new product successfully", async () => {
       const newProduct = new ProdutoBuilder().build();
@@ -26,15 +30,22 @@ test.describe("Produtos API Tests", () => {
         admToken,
       );
       test.expect(response.status()).toBe(201);
+      const responseBody = await response.json();
       test
-        .expect(await response.json())
+        .expect(responseBody)
         .toHaveProperty("message", "Cadastro realizado com sucesso");
+
+      setupHelper.adicionarProdutoId(responseBody._id);
     });
 
     test("should not create a new product with the same name", async () => {
       const newProduct = new ProdutoBuilder().build();
-
-      await produtoController.criarProduto(newProduct, admToken);
+      const createResponse = await produtoController.criarProduto(
+        newProduct,
+        admToken,
+      );
+      const createResponseBody = await createResponse.json();
+      setupHelper.adicionarProdutoId(createResponseBody._id);
 
       const response = await produtoController.criarProduto(
         newProduct,
@@ -79,7 +90,11 @@ test.describe("Produtos API Tests", () => {
   test.describe("Listagem de produtos", () => {
     test("should list all products successfully", async () => {
       const newProduct = new ProdutoBuilder().build();
-      await produtoController.criarProduto(newProduct, admToken);
+      const createResponse = await produtoController.criarProduto(
+        newProduct,
+        admToken,
+      );
+      setupHelper.adicionarProdutoId((await createResponse.json())._id);
 
       const response = await produtoController.listarProdutos();
       const responseBody = await response.json();
@@ -91,7 +106,11 @@ test.describe("Produtos API Tests", () => {
 
     test("should list products with query parameters", async () => {
       const newProduct = new ProdutoBuilder().build();
-      await produtoController.criarProduto(newProduct, admToken);
+      const createResponse = await produtoController.criarProduto(
+        newProduct,
+        admToken,
+      );
+      setupHelper.adicionarProdutoId((await createResponse.json())._id);
 
       const response = await produtoController.listarProdutosComQueryParams({
         nome: newProduct.nome,
@@ -112,6 +131,8 @@ test.describe("Produtos API Tests", () => {
         admToken,
       );
       const productId = (await createResponse.json())._id;
+
+      setupHelper.adicionarProdutoId(productId);
 
       const response = await produtoController.buscarProdutoPorId(productId);
       const responseBody = await response.json();
@@ -186,6 +207,8 @@ test.describe("Produtos API Tests", () => {
       );
       const productId = (await createResponse.json())._id;
 
+      setupHelper.adicionarProdutoId(productId);
+
       const response = await produtoController.deletarProduto(
         productId,
         clientToken,
@@ -205,6 +228,8 @@ test.describe("Produtos API Tests", () => {
       );
       const productId = (await createResponse.json())._id;
 
+      setupHelper.adicionarProdutoId(productId);
+
       const response = await produtoController.deletarProduto(productId, "");
       test.expect(response.status()).toBe(401);
       test
@@ -214,5 +239,9 @@ test.describe("Produtos API Tests", () => {
           "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais",
         );
     });
+  });
+
+  test.describe("Cenários de Edição", () => {
+    test("should edit product successfully", async () => {});
   });
 });

@@ -41,4 +41,17 @@ export class ProdutoController {
       },
     });
   }
+
+  async editarProduto(
+    id: string,
+    payload: Produto,
+    token: string,
+  ): Promise<APIResponse> {
+    return await this.request.put(`${this.BASE_URL}/${id}`, {
+      headers: {
+        authorization: token,
+      },
+      data: payload,
+    });
+  }
 }
