@@ -2,16 +2,21 @@ import { APIRequestContext } from "@playwright/test";
 import { UsuarioBuilder } from "../builders/usuario.builder";
 import { UsuarioController } from "../controllers/usuario.controller";
 import { LoginController } from "../controllers/login.controller";
+import { Produto } from "../models/produtos.model";
+import { ProdutoController } from "../controllers/produto.controller";
 
 export class SetupHelper {
   private usuarioController: UsuarioController;
   private loginController: LoginController;
+  private produtoController: ProdutoController;
 
   private userIDs: string[] = [];
+  private produtoIDs: string[] = [];
 
   constructor(request: APIRequestContext) {
     this.usuarioController = new UsuarioController(request);
     this.loginController = new LoginController(request);
+    this.produtoController = new ProdutoController(request);
   }
 
   async criarUsuarioELogar(isAdmin: "true" | "false") {
@@ -39,7 +44,22 @@ export class SetupHelper {
     };
   }
 
-  async limparDadosGerados() {
+  public adicionarUsuarioId(id: string) {
+    this.userIDs.push(id);
+  }
+
+  public adicionarProdutoId(id: string) {
+    this.produtoIDs.push(id);
+  }
+
+  async limparDadosGerados(admToken?: string) {
+    if (admToken) {
+      for (const id of this.produtoIDs) {
+        await this.produtoController.deletarProduto(id, admToken);
+      }
+    }
+    this.produtoIDs = [];
+
     for (const id of this.userIDs) {
       await this.usuarioController.deletarUsuario(id);
     }
