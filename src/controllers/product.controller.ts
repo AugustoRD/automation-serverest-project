@@ -1,7 +1,7 @@
 import { APIRequestContext, APIResponse } from "@playwright/test";
-import { Produto } from "../models/produtos.model";
+import { Product } from "../models/product.model";
 
-export class ProdutoController {
+export class ProductController {
   private request: APIRequestContext;
   private readonly BASE_URL = "/produtos";
 
@@ -9,7 +9,7 @@ export class ProdutoController {
     this.request = request;
   }
 
-  async criarProduto(payload: Produto, token: string): Promise<APIResponse> {
+  async createProduct(payload: Product, token: string): Promise<APIResponse> {
     return await this.request.post(this.BASE_URL, {
       headers: {
         authorization: token,
@@ -18,11 +18,11 @@ export class ProdutoController {
     });
   }
 
-  async listarProdutos(): Promise<APIResponse> {
+  async listProducts(): Promise<APIResponse> {
     return await this.request.get(this.BASE_URL);
   }
 
-  async listarProdutosComQueryParams(params: {
+  async listProductsWithQueryParams(params: {
     [key: string]: string;
   }): Promise<APIResponse> {
     return await this.request.get(this.BASE_URL, {
@@ -30,11 +30,11 @@ export class ProdutoController {
     });
   }
 
-  async buscarProdutoPorId(id: string): Promise<APIResponse> {
+  async getProductById(id: string): Promise<APIResponse> {
     return await this.request.get(`${this.BASE_URL}/${id}`);
   }
 
-  async deletarProduto(id: string, token: string): Promise<APIResponse> {
+  async deleteProduct(id: string, token: string): Promise<APIResponse> {
     return await this.request.delete(`${this.BASE_URL}/${id}`, {
       headers: {
         authorization: token,
@@ -42,9 +42,9 @@ export class ProdutoController {
     });
   }
 
-  async editarProduto(
+  async updateProduct(
     id: string,
-    payload: Produto,
+    payload: Product,
     token: string,
   ): Promise<APIResponse> {
     return await this.request.put(`${this.BASE_URL}/${id}`, {

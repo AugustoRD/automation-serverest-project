@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { UsuarioBuilder } from "../../../src/builders/usuario.builder";
+import { UserBuilder } from "../../../src/builders/user.builder";
 import { LoginController } from "../../../src/controllers/login.controller";
-import { UsuarioController } from "../../../src/controllers/usuario.controller";
+import { UserController } from "../../../src/controllers/user.controller";
 import { faker } from "@faker-js/faker";
 import { SetupHelper } from "../../../src/helpers/setup.helper";
 
@@ -15,18 +15,18 @@ test.describe("Login API Tests", () => {
   });
 
   test.afterEach(async () => {
-    await setupHelper.limparDadosGerados();
+    await setupHelper.tearDown();
   });
 
   test("should login with success", async () => {
-    const newUser = await setupHelper.criarUsuario("true");
+    const newUser = await setupHelper.registerUser("true");
 
     const loginData = {
       email: newUser.email,
       password: newUser.password,
     };
 
-    const response = await loginController.realizarLogin(loginData);
+    const response = await loginController.doLogin(loginData);
     const responseBody = await response.json();
     expect(response.status()).toBe(200);
     expect(responseBody).toHaveProperty(
@@ -42,7 +42,7 @@ test.describe("Login API Tests", () => {
       password: faker.internet.password(),
     };
 
-    const response = await loginController.realizarLogin(loginData);
+    const response = await loginController.doLogin(loginData);
     const responseBody = await response.json();
     expect(response.status()).toBe(401);
     expect(responseBody).toHaveProperty(
@@ -52,14 +52,14 @@ test.describe("Login API Tests", () => {
   });
 
   test("should fail login with wrong password", async () => {
-    const newUser = await setupHelper.criarUsuario("true");
+    const newUser = await setupHelper.registerUser("true");
 
     const loginData = {
       email: newUser.email,
       password: faker.internet.password(),
     };
 
-    const response = await loginController.realizarLogin(loginData);
+    const response = await loginController.doLogin(loginData);
     const responseBody = await response.json();
     expect(response.status()).toBe(401);
     expect(responseBody).toHaveProperty(

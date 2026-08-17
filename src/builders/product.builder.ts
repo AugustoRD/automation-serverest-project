@@ -1,12 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { Produto } from "../models/produtos.model";
+import { Product } from "../models/product.model";
 
-export class ProdutoBuilder {
-  private produto: Produto;
+export class ProductBuilder {
+  private product: Product;
 
   constructor() {
-    this.produto = {
-      nome: faker.commerce.productName(),
+    this.product = {
+      nome: `${faker.commerce.productName()} ${faker.string.uuid()}`,
       preco: parseInt(faker.commerce.price()),
       descricao: faker.commerce.productDescription(),
       quantidade: faker.number.int({ min: 1, max: 100 }),
@@ -14,26 +14,26 @@ export class ProdutoBuilder {
   }
 
   withNome(nome: string) {
-    this.produto.nome = nome;
+    this.product.nome = nome;
     return this;
   }
 
   withPreco(preco: number) {
-    this.produto.preco = preco;
+    this.product.preco = preco;
     return this;
   }
 
   withDescricao(descricao: string) {
-    this.produto.descricao = descricao;
+    this.product.descricao = descricao;
     return this;
   }
 
   withQuantidade(quantidade: number) {
-    this.produto.quantidade = quantidade;
+    this.product.quantidade = quantidade;
     return this;
   }
 
-  build(): Produto {
-    return this.produto;
+  build(): Product {
+    return this.product;
   }
 }

@@ -1,26 +1,26 @@
 import { test, expect } from "@playwright/test";
-import { UsuarioBuilder } from "../../../src/builders/usuario.builder";
-import { UsuarioController } from "../../../src/controllers/usuario.controller";
+import { UserBuilder } from "../../../src/builders/user.builder";
+import { UserController } from "../../../src/controllers/user.controller";
 import { SetupHelper } from "../../../src/helpers/setup.helper";
 import { faker } from "@faker-js/faker";
 
-test.describe("Usuários API Tests", () => {
-  let usuarioController: UsuarioController;
+test.describe("User API Tests", () => {
+  let userController: UserController;
   let setupHelper: SetupHelper;
 
   test.beforeEach(async ({ request }) => {
-    usuarioController = new UsuarioController(request);
+    userController = new UserController(request);
     setupHelper = new SetupHelper(request);
   });
 
   test.afterEach(async () => {
-    await setupHelper.limparDadosGerados();
+    await setupHelper.tearDown();
   });
 
-  test.describe("Cadastro API tests", () => {
+  test.describe("Register Scenarios", () => {
     test("should create a new user with admin role successfully", async () => {
-      const newUser = new UsuarioBuilder().build();
-      const response = await usuarioController.criarUsuario(newUser);
+      const newUser = new UserBuilder().build();
+      const response = await userController.createUser(newUser);
 
       expect(response.status()).toBe(201);
       const responseBody = await response.json();
@@ -31,12 +31,12 @@ test.describe("Usuários API Tests", () => {
       );
       expect(responseBody).toHaveProperty("_id");
 
-      setupHelper.adicionarUsuarioId(responseBody._id);
+      setupHelper.addUserId(responseBody._id);
     });
 
     test("should create a new user with client role successfully", async () => {
-      const newUser = new UsuarioBuilder().withAdministrador("false").build();
-      const response = await usuarioController.criarUsuario(newUser);
+      const newUser = new UserBuilder().withAdministrador("false").build();
+      const response = await userController.createUser(newUser);
 
       expect(response.status()).toBe(201);
       const responseBody = await response.json();
@@ -47,17 +47,17 @@ test.describe("Usuários API Tests", () => {
       );
       expect(responseBody).toHaveProperty("_id");
 
-      setupHelper.adicionarUsuarioId(responseBody._id);
+      setupHelper.addUserId(responseBody._id);
     });
 
     test("should not create a new user with the same email", async () => {
-      const newUser = new UsuarioBuilder().build();
-      const response = await usuarioController.criarUsuario(newUser);
+      const newUser = new UserBuilder().build();
+      const response = await userController.createUser(newUser);
       const responseBody = await response.json();
       expect(response.status()).toBe(201);
-      setupHelper.adicionarUsuarioId(responseBody._id);
+      setupHelper.addUserId(responseBody._id);
 
-      const responseDuplicate = await usuarioController.criarUsuario(newUser);
+      const responseDuplicate = await userController.createUser(newUser);
       const responseBodyDuplicate = await responseDuplicate.json();
       expect(responseDuplicate.status()).toBe(400);
       expect(responseBodyDuplicate).toHaveProperty(
@@ -67,16 +67,16 @@ test.describe("Usuários API Tests", () => {
     });
   });
 
-  test.describe("Cenários de Edição", () => {
+  test.describe("Edit Scenarios", () => {
     test("should edit a user successfully", async () => {
-      const newUser = await setupHelper.criarUsuario("true");
+      const newUser = await setupHelper.registerUser("true");
 
-      const editadedUser = new UsuarioBuilder()
+      const editadedUser = new UserBuilder()
         .withEmail(newUser.email)
         .withNome("Augusto Editado")
         .build();
 
-      const putResponse = await usuarioController.editarUsuario(
+      const putResponse = await userController.updateUser(
         newUser.id,
         editadedUser,
       );
@@ -85,9 +85,7 @@ test.describe("Usuários API Tests", () => {
         "message",
         "Registro alterado com sucesso",
       );
-      const getResponse = await usuarioController.buscarUsuarioPorId(
-        newUser.id,
-      );
+      const getResponse = await userController.getUserById(newUser.id);
       const bodyGet = await getResponse.json();
 
       expect(bodyGet).toHaveProperty("nome", "Augusto Editado");
@@ -96,12 +94,12 @@ test.describe("Usuários API Tests", () => {
     test("should create a new user when sending invalid id for put", async () => {
       const invalidId = faker.string.alphanumeric(16);
 
-      const editadedUser = new UsuarioBuilder()
+      const editadedUser = new UserBuilder()
         // .withEmail(newUser.email)
-        .withNome("Augusto Editado")
+        .withNome("faker.name.fullName()")
         .build();
 
-      const putResponse = await usuarioController.editarUsuario(
+      const putResponse = await userController.updateUser(
         invalidId,
         editadedUser,
       );
@@ -112,24 +110,21 @@ test.describe("Usuários API Tests", () => {
         "Cadastro realizado com sucesso",
       );
 
-      setupHelper.adicionarUsuarioId(putBody._id);
+      setupHelper.addUserId(putBody._id);
     });
 
     test("should not edit user when email already exists", async ({
       request,
     }) => {
-      const newUser = await setupHelper.criarUsuario("true");
+      const newUser = await setupHelper.registerUser("true");
       const invalidId = faker.string.alphanumeric(16);
 
-      const editadedUser = new UsuarioBuilder()
+      const editadedUser = new UserBuilder()
         .withEmail(newUser.email)
         .withNome("Augusto Editado")
         .build();
 
-      const response = await usuarioController.editarUsuario(
-        invalidId,
-        editadedUser,
-      );
+      const response = await userController.updateUser(invalidId, editadedUser);
 
       expect(response.status()).toBe(400);
 
@@ -138,13 +133,13 @@ test.describe("Usuários API Tests", () => {
     });
   });
 
-  test.describe("Cenários de Listagem", () => {
+  test.describe("List Scenarios", () => {
     test("should list all users successfully", async () => {
-      const newUser = await setupHelper.criarUsuario("true");
+      const newUser = await setupHelper.registerUser("true");
       //expect(newUser.status()).toBe(201);
-      const newUser2 = await setupHelper.criarUsuario("true");
+      const newUser2 = await setupHelper.registerUser("true");
 
-      const response = await usuarioController.listarUsuarios();
+      const response = await userController.getAllUsers();
       const body = await response.json();
 
       expect(response.status()).toBe(200);
@@ -154,13 +149,13 @@ test.describe("Usuários API Tests", () => {
     });
 
     test("should list user with query parameter", async () => {
-      const newUser = await setupHelper.criarUsuario("true");
+      const newUser = await setupHelper.registerUser("true");
 
       //const response = await usuarioController.listarUsuariosComQueryParams(
       //  `email=${newUser.email}`,
       // );
 
-      const response = await usuarioController.listarUsuariosComQueryParams({
+      const response = await userController.getUserWithQueryParams({
         email: newUser.email,
       });
       const body = await response.json();
@@ -171,9 +166,9 @@ test.describe("Usuários API Tests", () => {
     });
 
     test("should list user with path parameter", async () => {
-      const newUser = await setupHelper.criarUsuario("true");
+      const newUser = await setupHelper.registerUser("true");
 
-      const response = await usuarioController.buscarUsuarioPorId(newUser.id);
+      const response = await userController.getUserById(newUser.id);
       const body = await response.json();
 
       expect(response.status()).toBe(200);
@@ -183,7 +178,7 @@ test.describe("Usuários API Tests", () => {
     test("shouldn't list user with invalid id", async () => {
       const invalidID = faker.string.alphanumeric(16);
 
-      const response = await usuarioController.buscarUsuarioPorId(invalidID);
+      const response = await userController.getUserById(invalidID);
       const body = await response.json();
 
       expect(response.status()).toBe(400);
@@ -191,11 +186,11 @@ test.describe("Usuários API Tests", () => {
     });
   });
 
-  test.describe("Cenários de Exclusão", () => {
+  test.describe("Delete Scenarios", () => {
     test("should delete user with success", async ({}) => {
-      const newUser = await setupHelper.criarUsuario("true");
+      const newUser = await setupHelper.registerUser("true");
 
-      const response = await usuarioController.deletarUsuario(newUser.id);
+      const response = await userController.deleteUser(newUser.id);
 
       expect(response.status()).toBe(200);
 
@@ -210,7 +205,7 @@ test.describe("Usuários API Tests", () => {
 
       const invalidID = faker.string.alphanumeric(16);
 
-      const response = await usuarioController.deletarUsuario(invalidID);
+      const response = await userController.deleteUser(invalidID);
 
       expect(response.status()).toBe(200);
 
