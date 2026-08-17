@@ -1,7 +1,7 @@
 import { APIRequestContext, APIResponse } from "@playwright/test";
-import { Usuario } from "../models/usuario.model";
+import { User } from "../models/user.model";
 
-export class UsuarioController {
+export class UserController {
   private request: APIRequestContext;
   private readonly BASE_URL = "/usuarios";
 
@@ -9,11 +9,11 @@ export class UsuarioController {
     this.request = request;
   }
 
-  async listarUsuarios(): Promise<APIResponse> {
+  async getAllUsers(): Promise<APIResponse> {
     return await this.request.get(this.BASE_URL);
   }
 
-  async listarUsuariosComQueryParams(params: {
+  async getUserWithQueryParams(params: {
     [key: string]: string;
   }): Promise<APIResponse> {
     return await this.request.get(this.BASE_URL, {
@@ -27,23 +27,23 @@ export class UsuarioController {
   //  return await this.request.get(`${this.BASE_URL}?${queryParams}`);
   //}
 
-  async buscarUsuarioPorId(id: string): Promise<APIResponse> {
+  async getUserById(id: string): Promise<APIResponse> {
     return await this.request.get(`${this.BASE_URL}/${id}`);
   }
 
-  async criarUsuario(payload: Usuario): Promise<APIResponse> {
+  async createUser(payload: User): Promise<APIResponse> {
     return await this.request.post(this.BASE_URL, {
       data: payload,
     });
   }
 
-  async editarUsuario(id: string, payload: Usuario): Promise<APIResponse> {
+  async updateUser(id: string, payload: User): Promise<APIResponse> {
     return await this.request.put(`${this.BASE_URL}/${id}`, {
       data: payload,
     });
   }
 
-  async deletarUsuario(id: string): Promise<APIResponse> {
+  async deleteUser(id: string): Promise<APIResponse> {
     return await this.request.delete(`${this.BASE_URL}/${id}`);
   }
 }

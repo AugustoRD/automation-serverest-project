@@ -1,67 +1,67 @@
 import { APIRequestContext } from "@playwright/test";
-import { UsuarioBuilder } from "../builders/usuario.builder";
-import { UsuarioController } from "../controllers/usuario.controller";
+import { UserBuilder } from "../builders/user.builder";
+import { UserController } from "../controllers/user.controller";
 import { LoginController } from "../controllers/login.controller";
-import { Produto } from "../models/produtos.model";
-import { ProdutoController } from "../controllers/produto.controller";
+import { Product } from "../models/product.model";
+import { ProductController } from "../controllers/product.controller";
 
 export class SetupHelper {
-  private usuarioController: UsuarioController;
+  private userController: UserController;
   private loginController: LoginController;
-  private produtoController: ProdutoController;
+  private productController: ProductController;
 
   private userIDs: string[] = [];
-  private produtoIDs: string[] = [];
+  private productIDs: string[] = [];
 
   constructor(request: APIRequestContext) {
-    this.usuarioController = new UsuarioController(request);
+    this.userController = new UserController(request);
     this.loginController = new LoginController(request);
-    this.produtoController = new ProdutoController(request);
+    this.productController = new ProductController(request);
   }
 
-  async criarUsuarioELogar(isAdmin: "true" | "false") {
-    const usuario = await this.criarUsuario(isAdmin);
-    const token = await this.loginController.obterTokenAutenticacao({
+  async createAndLogin(isAdmin: "true" | "false") {
+    const usuario = await this.registerUser(isAdmin);
+    const token = await this.loginController.getAuthenticationToken({
       email: usuario.email,
       password: usuario.password,
     });
     return { ...usuario, token };
   }
 
-  async criarUsuario(isAdmin: "true" | "false") {
-    const usuario = new UsuarioBuilder().withAdministrador(isAdmin).build();
-    const response = await this.usuarioController.criarUsuario(usuario);
+  async registerUser(isAdmin: "true" | "false") {
+    const user = new UserBuilder().withAdministrador(isAdmin).build();
+    const response = await this.userController.createUser(user);
     const body = await response.json();
 
     this.userIDs.push(body._id);
 
     return {
       id: body._id,
-      nome: usuario.nome,
-      email: usuario.email,
-      password: usuario.password,
-      administrador: usuario.administrador,
+      nome: user.nome,
+      email: user.email,
+      password: user.password,
+      administrador: user.administrador,
     };
   }
 
-  public adicionarUsuarioId(id: string) {
+  public addUserId(id: string) {
     this.userIDs.push(id);
   }
 
-  public adicionarProdutoId(id: string) {
-    this.produtoIDs.push(id);
+  public addProductId(id: string) {
+    this.productIDs.push(id);
   }
 
-  async limparDadosGerados(admToken?: string) {
+  async tearDown(admToken?: string) {
     if (admToken) {
-      for (const id of this.produtoIDs) {
-        await this.produtoController.deletarProduto(id, admToken);
+      for (const id of this.productIDs) {
+        await this.productController.deleteProduct(id, admToken);
       }
     }
-    this.produtoIDs = [];
+    this.productIDs = [];
 
     for (const id of this.userIDs) {
-      await this.usuarioController.deletarUsuario(id);
+      await this.userController.deleteUser(id);
     }
     this.userIDs = [];
   }
