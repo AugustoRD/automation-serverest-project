@@ -1,4 +1,4 @@
-import { APIRequestContext } from "@playwright/test";
+import { APIRequestContext, expect } from "@playwright/test";
 import { UserBuilder } from "../builders/user.builder";
 import { UserController } from "../controllers/user.controller";
 import { LoginController } from "../controllers/login.controller";
@@ -61,7 +61,8 @@ export class SetupHelper {
     this.productIDs = [];
 
     for (const id of this.userIDs) {
-      await this.userController.deleteUser(id);
+      const response = await this.userController.deleteUser(id);
+      expect(response.ok()).toBeTruthy();
     }
     this.userIDs = [];
   }

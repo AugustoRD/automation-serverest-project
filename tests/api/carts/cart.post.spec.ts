@@ -21,6 +21,12 @@ test.describe("POST /carrinhos", () => {
     ({ token: clientToken } = await setupHelper.createAndLogin("false"));
   });
 
+  test.afterEach(async () => {
+    await cartController.cancelPurchase(clientToken);
+
+    await setupHelper.tearDown(admToken);
+  });
+
   test("should create a new cart successfully", async () => {
     const newProduct = new ProductBuilder().build();
     const productResponse = await productController.createProduct(
@@ -31,6 +37,8 @@ test.describe("POST /carrinhos", () => {
     expect(productResponse.status()).toBe(201);
     const productId = (await productResponse.json())._id;
 
+    setupHelper.addProductId(productId);
+
     const cartPayload = new CartBuilder().addProduct(productId, 1).build();
 
     const cartResponse = await cartController.createCart(
@@ -39,9 +47,12 @@ test.describe("POST /carrinhos", () => {
     );
 
     expect(cartResponse.status()).toBe(201);
-    expect(await cartResponse.json()).toHaveProperty(
+    const responseBody = await cartResponse.json();
+    expect(responseBody).toHaveProperty(
       "message",
       "Cadastro realizado com sucesso",
     );
+    expect(responseBody).toHaveProperty("_id");
+    expect(typeof responseBody._id).toBe("string");
   });
 });

@@ -22,4 +22,10 @@ export class CartController {
       headers: this.getHeaders(token),
     });
   }
+
+  async cancelPurchase(token: string) {
+    return await this.request.delete(`${this.BASE_URL}/cancelar-compra`, {
+      headers: this.getHeaders(token),
+    });
+  }
 }
