@@ -1,7 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { UserBuilder } from "../../../src/builders/user.builder";
 import { LoginController } from "../../../src/controllers/login.controller";
-import { UserController } from "../../../src/controllers/user.controller";
 import { faker } from "@faker-js/faker";
 import { SetupHelper } from "../../../src/helpers/setup.helper";
 

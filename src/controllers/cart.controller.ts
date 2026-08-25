@@ -28,4 +28,8 @@ export class CartController {
       headers: this.getHeaders(token),
     });
   }
+
+  async getCartById(cartId: string) {
+    return await this.request.get(`${this.BASE_URL}/${cartId}`);
+  }
 }

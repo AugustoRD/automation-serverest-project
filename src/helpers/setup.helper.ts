@@ -4,6 +4,7 @@ import { UserController } from "../controllers/user.controller";
 import { LoginController } from "../controllers/login.controller";
 import { Product } from "../models/product.model";
 import { ProductController } from "../controllers/product.controller";
+import { ProductBuilder } from "../builders/product.builder";
 
 export class SetupHelper {
   private userController: UserController;
@@ -65,5 +66,19 @@ export class SetupHelper {
       expect(response.ok()).toBeTruthy();
     }
     this.userIDs = [];
+  }
+
+  async createProduct(admToken: string) {
+    const productData = new ProductBuilder().build();
+    const productResponse = await this.productController.createProduct(
+      productData,
+      admToken,
+    );
+
+    expect(productResponse.status()).toBe(201);
+    const productId = (await productResponse.json())._id;
+    this.addProductId(productId);
+
+    return { ...productData, id: productId };
   }
 }
