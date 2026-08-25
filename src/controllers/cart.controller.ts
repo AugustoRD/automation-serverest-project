@@ -32,4 +32,16 @@ export class CartController {
   async getCartById(cartId: string) {
     return await this.request.get(`${this.BASE_URL}/${cartId}`);
   }
+
+  async getAllCarts(token?: string) {
+    return await this.request.get(this.BASE_URL, {
+      headers: this.getHeaders(token),
+    });
+  }
+
+  async getCartsByUserId(userId: string, token?: string) {
+    return await this.request.get(`${this.BASE_URL}?idUsuario=${userId}`, {
+      headers: this.getHeaders(token),
+    });
+  }
 }
