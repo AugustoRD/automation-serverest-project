@@ -29,8 +29,10 @@ export class CartController {
     });
   }
 
-  async getCartById(cartId: string) {
-    return await this.request.get(`${this.BASE_URL}/${cartId}`);
+  async getCartById(cartId: string, token?: string) {
+    return await this.request.get(`${this.BASE_URL}/${cartId}`, {
+      headers: this.getHeaders(token),
+    });
   }
 
   async getAllCarts(token?: string) {
