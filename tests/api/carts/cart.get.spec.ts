@@ -66,4 +66,18 @@ test.describe("GET /carrinhos", () => {
 
     expect(responseBody.carrinhos[0].idUsuario).toBe(clientUserId);
   });
+
+  test("should fail when a user tries to list all carts without admin privileges", async () => {
+    test.fail(
+      true,
+      "This test is expected to fail due to access control restrictions.",
+    );
+
+    const cartResponse = await cartController.getAllCarts(clientToken);
+
+    expect(cartResponse.status()).toBe(403);
+    const responseBody = await cartResponse.json();
+
+    expect(responseBody).toHaveProperty("message", "Acesso negado");
+  });
 });
