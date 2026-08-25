@@ -29,6 +29,12 @@ export class CartController {
     });
   }
 
+  async completePurchase(token: string) {
+    return await this.request.delete(`${this.BASE_URL}/concluir-compra`, {
+      headers: this.getHeaders(token),
+    });
+  }
+
   async getCartById(cartId: string, token?: string) {
     return await this.request.get(`${this.BASE_URL}/${cartId}`, {
       headers: this.getHeaders(token),
