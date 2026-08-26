@@ -11,7 +11,7 @@ jobs:
 
     services:
       serverest:
-        image: paulogoncalves/serverest:latest
+        image: paulogoncalvesbh/serverest:latest
         ports:
           - 3000:3000
     steps:
