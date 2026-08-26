@@ -5,7 +5,6 @@ export class UserBuilder {
   private user: User;
 
   constructor() {
-    //sempre gera um usuário válido
     this.user = {
       nome: faker.person.fullName(),
       email: faker.internet.email(),
@@ -14,7 +13,6 @@ export class UserBuilder {
     };
   }
 
-  // Métodos para customizar os dados no teste
   withNome(nome: string) {
     this.user.nome = nome;
     return this;
@@ -35,7 +33,6 @@ export class UserBuilder {
     return this;
   }
 
-  // Método final que devolve o objeto pronto
   build(): User {
     return this.user;
   }

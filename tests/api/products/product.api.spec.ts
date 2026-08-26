@@ -250,12 +250,6 @@ test.describe("Product API Tests", () => {
 
       setupHelper.addProductId(productId);
 
-      //const updatedProduct: Produto = {
-      //  nome: "Produto Atualizado",
-      // preco: 99,
-      //descricao: "Descrição atualizada do produto",
-      // quantidade: 50,
-      // };
       const updatedProduct: Product = {
         ...newProduct,
         nome: faker.commerce.productName(),

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { UserBuilder } from "../../../src/builders/user.builder";
 import { UserController } from "../../../src/controllers/user.controller";
 import { SetupHelper } from "../../../src/helpers/setup.helper";
-import { fa, faker } from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 
 test.describe("User API Tests", () => {
   let userController: UserController;

@@ -1,31 +1,13 @@
-import { test, expect } from "@playwright/test";
-import { SetupHelper } from "../../../src/helpers/setup.helper";
-import { CartController } from "../../../src/controllers/cart.controller";
+import { test, expect } from "../../../src/fixtures/api.fixture";
 
 test.describe("GET /carrinhos", () => {
-  let cartController: CartController;
-  let setupHelper: SetupHelper;
-  let admToken: string;
-  let clientToken: string;
-  let clientUserId: string;
-
-  test.beforeEach(async ({ request }) => {
-    cartController = new CartController(request);
-    setupHelper = new SetupHelper(request);
-
-    ({ token: admToken } = await setupHelper.createAndLogin("true"));
-    ({ token: clientToken, id: clientUserId } =
-      await setupHelper.createAndLogin("false"));
-  });
-
-  test.afterEach(async () => {
-    await cartController.cancelPurchase(clientToken);
-
-    await setupHelper.tearDown(admToken);
-  });
-
   test.describe("List Carts", () => {
-    test("should list all carts successfully", async () => {
+    test("should list all carts successfully", async ({
+      cartController,
+      setupHelper,
+      admToken,
+      clientContext: { token: clientToken },
+    }) => {
       const product = await setupHelper.createProduct(admToken);
       await setupHelper.registerCartWithProducts(cartController, clientToken, [
         product,
@@ -44,7 +26,12 @@ test.describe("GET /carrinhos", () => {
       expect(responseBody.quantidade).toBe(responseBody.carrinhos.length);
     });
 
-    test("should list filtered carts by user ID successfully", async () => {
+    test("should list filtered carts by user ID successfully", async ({
+      setupHelper,
+      cartController,
+      admToken,
+      clientContext: { token: clientToken, id: clientUserId },
+    }) => {
       const product = await setupHelper.createProduct(admToken);
       const cartId = await setupHelper.registerCartWithProducts(
         cartController,
@@ -68,7 +55,10 @@ test.describe("GET /carrinhos", () => {
       expect(responseBody.carrinhos[0].idUsuario).toBe(clientUserId);
     });
 
-    test("should fail when a user tries to list all carts without admin privileges", async () => {
+    test("should fail when a user tries to list all carts without admin privileges", async ({
+      cartController,
+      clientContext: { token: clientToken },
+    }) => {
       test.fail(
         true,
         "This test is expected to fail due to access control restrictions.",
@@ -84,7 +74,12 @@ test.describe("GET /carrinhos", () => {
   });
 
   test.describe("Get Cart by ID", () => {
-    test("should get a cart by ID successfully", async () => {
+    test("should get a cart by ID successfully", async ({
+      setupHelper,
+      cartController,
+      admToken,
+      clientContext: { token: clientToken },
+    }) => {
       const product = await setupHelper.createProduct(admToken);
       const cartId = await setupHelper.registerCartWithProducts(
         cartController,
@@ -103,7 +98,12 @@ test.describe("GET /carrinhos", () => {
       expect(responseBody).toHaveProperty("_id", cartId);
     });
 
-    test("should block access to cart details for a user who is not the owner of the cart", async () => {
+    test("should block access to cart details for a user who is not the owner of the cart", async ({
+      setupHelper,
+      cartController,
+      admToken,
+      clientContext: { token: clientToken },
+    }) => {
       test.fail(
         true,
         "This test is expected to fail due to access control restrictions.",

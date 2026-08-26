@@ -26,7 +26,7 @@ export const test = base.extend<ApiFixtures>({
     await setupHelper.tearDown(token);
   },
 
-  clientContext: async ({ setupHelper, cartController }, use) => {
+  clientContext: async ({ setupHelper, cartController, admToken }, use) => {
     const clientUser = await setupHelper.createAndLogin("false");
 
     await use({ token: clientUser.token, id: clientUser.id });

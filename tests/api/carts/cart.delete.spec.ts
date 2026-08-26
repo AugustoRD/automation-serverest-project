@@ -1,35 +1,23 @@
-import { test, expect } from "@playwright/test";
-import { SetupHelper } from "../../../src/helpers/setup.helper";
-import { CartController } from "../../../src/controllers/cart.controller";
+import { test, expect } from "../../../src/fixtures/api.fixture";
 
 test.describe("DELETE /carrinhos", () => {
-  let cartController: CartController;
-  let setupHelper: SetupHelper;
-  let admToken: string;
-  let clientToken: string;
-
-  test.beforeEach(async ({ request }) => {
-    cartController = new CartController(request);
-    setupHelper = new SetupHelper(request);
-
-    ({ token: admToken } = await setupHelper.createAndLogin("true"));
-    ({ token: clientToken } = await setupHelper.createAndLogin("false"));
-  });
-
-  test.afterEach(async () => {
-    await cartController.cancelPurchase(clientToken);
-
-    await setupHelper.tearDown(admToken);
-  });
-
   test.describe("Complete Purchase", () => {
-    test("should complete the purchase successfully", async () => {
+    test("should complete the purchase successfully", async ({
+      cartController,
+      setupHelper,
+      admToken,
+      clientContext,
+    }) => {
       const product = await setupHelper.createProduct(admToken);
-      await setupHelper.registerCartWithProducts(cartController, clientToken, [
-        product,
-      ]);
+      await setupHelper.registerCartWithProducts(
+        cartController,
+        clientContext.token,
+        [product],
+      );
 
-      const cartResponse = await cartController.completePurchase(clientToken);
+      const cartResponse = await cartController.completePurchase(
+        clientContext.token,
+      );
 
       expect(cartResponse.status()).toBe(200);
       const responseBody = await cartResponse.json();
@@ -41,13 +29,22 @@ test.describe("DELETE /carrinhos", () => {
   });
 
   test.describe("Cancel Purchase", () => {
-    test("should cancel the purchase successfully", async () => {
+    test("should cancel the purchase successfully", async ({
+      cartController,
+      setupHelper,
+      admToken,
+      clientContext,
+    }) => {
       const product = await setupHelper.createProduct(admToken);
-      await setupHelper.registerCartWithProducts(cartController, clientToken, [
-        product,
-      ]);
+      await setupHelper.registerCartWithProducts(
+        cartController,
+        clientContext.token,
+        [product],
+      );
 
-      const cartResponse = await cartController.cancelPurchase(clientToken);
+      const cartResponse = await cartController.cancelPurchase(
+        clientContext.token,
+      );
 
       expect(cartResponse.status()).toBe(200);
       const responseBody = await cartResponse.json();
