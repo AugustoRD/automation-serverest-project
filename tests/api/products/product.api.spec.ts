@@ -4,6 +4,8 @@ import { Product } from "../../../src/models/product.model";
 import { ProductBuilder } from "../../../src/builders/product.builder";
 import { SetupHelper } from "../../../src/helpers/setup.helper";
 import { faker } from "@faker-js/faker";
+import { CartController } from "../../../src/controllers/cart.controller";
+import { CartBuilder } from "../../../src/builders/cart.builder";
 
 test.describe("Product API Tests", () => {
   let productController: ProductController;
@@ -236,6 +238,38 @@ test.describe("Product API Tests", () => {
           "message",
           "Token de acesso ausente, inválido, expirado ou usuário do token não existe mais",
         );
+    });
+
+    test("should not delete product linked to a cart", async ({ request }) => {
+      const newProduct = new ProductBuilder().build();
+      const createResponse = await productController.createProduct(
+        newProduct,
+        admToken,
+      );
+      const productId = (await createResponse.json())._id;
+
+      setupHelper.addProductId(productId);
+
+      const { token: clientToken } = await setupHelper.createAndLogin("false");
+
+      const cartController = new CartController(request);
+      const cartPayload = new CartBuilder().addProduct(productId).build();
+
+      await cartController.createCart(cartPayload, clientToken);
+
+      const response = await productController.deleteProduct(
+        productId,
+        admToken,
+      );
+
+      test.expect(response.status()).toBe(400);
+      test
+        .expect(await response.json())
+        .toHaveProperty(
+          "message",
+          "Não é permitido excluir produto que faz parte de carrinho",
+        );
+      await cartController.cancelPurchase(clientToken);
     });
   });
 

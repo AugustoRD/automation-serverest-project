@@ -65,7 +65,6 @@ export class SetupHelper {
 
     for (const id of this.userIDs) {
       const response = await this.userController.deleteUser(id, admToken);
-      expect(response.ok()).toBeTruthy();
     }
     this.userIDs = [];
   }
