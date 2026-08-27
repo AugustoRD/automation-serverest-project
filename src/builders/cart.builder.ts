@@ -1,4 +1,5 @@
 import { CartPayload, ProductCart } from "../models/cart.model";
+import { faker } from "@faker-js/faker";
 
 export class CartBuilder {
   private cart: CartPayload;
