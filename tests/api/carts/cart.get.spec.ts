@@ -183,4 +183,21 @@ test.describe("GET /carrinhos", () => {
       expect(responseBody).toHaveProperty("message", "Acesso negado");
     });
   });
+
+  test("should fail when trying to get a cart with a non-existing ID", async ({
+    cartController,
+    admToken,
+  }) => {
+    const nonExistingCartId = faker.string.alphanumeric(16);
+
+    const cartResponse = await cartController.getCartById(
+      nonExistingCartId,
+      admToken,
+    );
+
+    expect(cartResponse.status()).toBe(400);
+    const responseBody = await cartResponse.json();
+
+    expect(responseBody).toHaveProperty("message", "Carrinho não encontrado");
+  });
 });
