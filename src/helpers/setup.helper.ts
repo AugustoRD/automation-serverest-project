@@ -1,9 +1,12 @@
-import { APIRequestContext } from "@playwright/test";
+import { APIRequestContext, expect } from "@playwright/test";
 import { UserBuilder } from "../builders/user.builder";
 import { UserController } from "../controllers/user.controller";
 import { LoginController } from "../controllers/login.controller";
 import { Product } from "../models/product.model";
 import { ProductController } from "../controllers/product.controller";
+import { ProductBuilder } from "../builders/product.builder";
+import { CartBuilder } from "../builders/cart.builder";
+import { CartController } from "../controllers/cart.controller";
 
 export class SetupHelper {
   private userController: UserController;
@@ -61,8 +64,45 @@ export class SetupHelper {
     this.productIDs = [];
 
     for (const id of this.userIDs) {
-      await this.userController.deleteUser(id);
+      const response = await this.userController.deleteUser(id, admToken);
+      expect(response.ok()).toBeTruthy();
     }
     this.userIDs = [];
+  }
+
+  async createProduct(admToken: string) {
+    const productData = new ProductBuilder().build();
+    const productResponse = await this.productController.createProduct(
+      productData,
+      admToken,
+    );
+
+    expect(productResponse.status()).toBe(201);
+    const productId = (await productResponse.json())._id;
+    this.addProductId(productId);
+
+    return { ...productData, id: productId };
+  }
+
+  async registerCartWithProducts(
+    cartController: CartController,
+    clientToken: string,
+    products: (Product & { id: string })[],
+  ) {
+    const cartBuilder = new CartBuilder();
+
+    for (const product of products) {
+      cartBuilder.addProduct(product.id, 1);
+    }
+
+    const cartPayload = cartBuilder.build();
+    const cartResponse = await cartController.createCart(
+      cartPayload,
+      clientToken,
+    );
+
+    expect(cartResponse.status()).toBe(201);
+    const cartId = (await cartResponse.json())._id;
+    return cartId;
   }
 }

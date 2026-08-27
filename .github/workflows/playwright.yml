@@ -3,11 +3,17 @@ on:
   push:
     branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
+    services:
+      serverest:
+        image: paulogoncalvesbh/serverest:latest
+        ports:
+          - 3000:3000
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -16,7 +22,7 @@ jobs:
         run: docker build -t testes-api-serverest .
 
       - name: Executar os Testes no Container (Run)
-        run: docker run -e BASE_URL="https://serverest.dev" -v ${{ github.workspace }}/playwright-report:/app/playwright-report testes-api-serverest
+        run: docker run --network host -e BASE_URL="http://localhost:3000" -v ${{ github.workspace }}/playwright-report:/app/playwright-report testes-api-serverest
 
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
