@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { test, expect } from "../../../src/fixtures/api.fixture";
 
 test.describe("GET /carrinhos", () => {
@@ -39,8 +40,8 @@ test.describe("GET /carrinhos", () => {
         [product],
       );
 
-      const cartResponse = await cartController.getCartsByUserId(
-        clientUserId,
+      const cartResponse = await cartController.getCartsByFilters(
+        { idUsuario: clientUserId },
         admToken,
       );
 
@@ -70,6 +71,60 @@ test.describe("GET /carrinhos", () => {
       const responseBody = await cartResponse.json();
 
       expect(responseBody).toHaveProperty("message", "Acesso negado");
+    });
+
+    test("should list carts with multiply filters successfully", async ({
+      setupHelper,
+      cartController,
+      admToken,
+      clientContext: { token: clientToken, id: clientUserId },
+    }) => {
+      const product = await setupHelper.createProduct(admToken);
+      const cartId = await setupHelper.registerCartWithProducts(
+        cartController,
+        clientToken,
+        [product],
+      );
+
+      const expectedPrecoTotal = product.preco.toString();
+
+      const cartResponse = await cartController.getCartsByFilters(
+        { idUsuario: clientUserId, precoTotal: expectedPrecoTotal },
+        admToken,
+      );
+
+      expect(cartResponse.status()).toBe(200);
+      const responseBody = await cartResponse.json();
+
+      expect(responseBody).toHaveProperty("carrinhos");
+      expect(Array.isArray(responseBody.carrinhos)).toBe(true);
+
+      expect(responseBody.carrinhos.length).toBe(1);
+
+      expect(responseBody.carrinhos[0].idUsuario).toBe(clientUserId);
+      expect(responseBody.carrinhos[0].precoTotal).toBe(product.preco);
+    });
+
+    test("should return an empty list when searching for cart with non-existing id", async ({
+      cartController,
+      admToken,
+    }) => {
+      const nonExistingCartId = faker.string.uuid();
+
+      const cartResponse = await cartController.getCartsByFilters(
+        { _id: nonExistingCartId },
+        admToken,
+      );
+
+      expect(cartResponse.status()).toBe(200);
+
+      const responseBody = await cartResponse.json();
+
+      expect(responseBody).toHaveProperty("carrinhos");
+      expect(responseBody).toHaveProperty("quantidade");
+      expect(responseBody.quantidade).toBe(0);
+      expect(Array.isArray(responseBody.carrinhos)).toBe(true);
+      expect(responseBody.carrinhos.length).toBe(0);
     });
   });
 
@@ -127,5 +182,22 @@ test.describe("GET /carrinhos", () => {
       const responseBody = await cartResponse.json();
       expect(responseBody).toHaveProperty("message", "Acesso negado");
     });
+  });
+
+  test("should fail when trying to get a cart with a non-existing ID", async ({
+    cartController,
+    admToken,
+  }) => {
+    const nonExistingCartId = faker.string.alphanumeric(16);
+
+    const cartResponse = await cartController.getCartById(
+      nonExistingCartId,
+      admToken,
+    );
+
+    expect(cartResponse.status()).toBe(400);
+    const responseBody = await cartResponse.json();
+
+    expect(responseBody).toHaveProperty("message", "Carrinho não encontrado");
   });
 });

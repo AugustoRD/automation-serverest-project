@@ -25,15 +25,21 @@ O **[ServeRest](https://serverest.dev/)** é uma API REST gratuita que simula um
 automation-serverest-project/
 ├── .github/
 │   └── workflows/
-│       └── playwright.yml     # Pipeline de CI/CD com Docker
+│       └── playwright.yml       # Pipeline de CI/CD com Docker
 ├── src/
 │   ├── builders/              # Padrão Builder para criação dinâmica de dados de massa
-│   ├── controllers/           # Mapeamento das requisições por rota da API
-│   ├── helpers/               # Funções auxiliares e configuração de ambiente/setup
-│   └── models/                # Interfaces, contratos e tipagens (TypeScript Models)
+│   ├── controllers/           # Mapeamento das requisições separadas por domínio da API
+│   ├── fixtures/              # Injeção de dependências e rotinas de Teardown Automático
+│   ├── helpers/               # Funções auxiliares (Autenticação e controle de estado)
+│   └── models/                # Interfaces e tipagens de contrato (TypeScript Models)
 ├── tests/
-│   └── api/                   # Especificações e cenários de testes de API (specs)
-├── playwright.api.config.ts   # Configurações do Playwright voltadas para testes de API
+│   ├── api/                   # Suítes de testes de API (Regras de negócio e Segurança)
+│   │   ├── carts/             # Fluxos de compra, filtros complexos e integridade referencial
+│   │   ├── login/             # Autenticação e geração de tokens
+│   │   ├── products/          # CRUD de produtos e limites de estoque
+│   │   └── users/             # CRUD de usuários e validações de perfil de acesso (RBAC)
+│   └── e2e/                   # Diretório base estruturado para futuros testes ponta a ponta
+├── playwright.api.config.ts   # Configurações do Playwright otimizadas para testes de API
 ├── playwright.config.ts       # Configurações gerais do Playwright
 ├── Dockerfile                 # Receita da imagem Docker baseada na Microsoft
 ├── .dockerignore              # Arquivos ignorados durante o build do Docker
@@ -92,6 +98,13 @@ Para isolar o ambiente e rodar os testes de dentro de um container Docker utiliz
    ```
 
 ---
+
+## Design Patterns Aplicados:
+    *   **Controllers & Builders**: Isolamento das rotas da API e geração dinâmica de dados.
+    *   **Fixtures (LIFO)**: Gerenciamento inteligente de estado (Setup) e limpeza de dados (Teardown) de forma autônoma e à prova de falhas.
+    *   **Living Documentation**: Mapeamento de bugs reais e vulnerabilidades direto no código utilizando `test.fail()` e `test.fixme()`.
+
+--- 
 
 ## Integração Contínua (CI/CD)
 

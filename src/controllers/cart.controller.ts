@@ -47,8 +47,9 @@ export class CartController {
     });
   }
 
-  async getCartsByUserId(userId: string, token?: string) {
-    return await this.request.get(`${this.BASE_URL}?idUsuario=${userId}`, {
+  async getCartsByFilters(filters: Record<string, string>, token?: string) {
+    const queryParams = new URLSearchParams(filters).toString();
+    return await this.request.get(`${this.BASE_URL}?${queryParams}`, {
       headers: this.getHeaders(token),
     });
   }

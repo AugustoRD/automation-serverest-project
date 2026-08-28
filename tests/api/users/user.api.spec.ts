@@ -3,6 +3,10 @@ import { UserBuilder } from "../../../src/builders/user.builder";
 import { UserController } from "../../../src/controllers/user.controller";
 import { SetupHelper } from "../../../src/helpers/setup.helper";
 import { faker } from "@faker-js/faker";
+import { ProductController } from "../../../src/controllers/product.controller";
+import { ProductBuilder } from "../../../src/builders/product.builder";
+import { CartController } from "../../../src/controllers/cart.controller";
+import { CartBuilder } from "../../../src/builders/cart.builder";
 
 test.describe("User API Tests", () => {
   let userController: UserController;
@@ -16,7 +20,7 @@ test.describe("User API Tests", () => {
   });
 
   test.afterEach(async () => {
-    await setupHelper.tearDown();
+    await setupHelper.tearDown(admToken);
   });
 
   test.describe("Register Scenarios", () => {
@@ -358,6 +362,37 @@ test.describe("User API Tests", () => {
       );
 
       expect(response.status()).toBe(403);
+    });
+
+    test("should not delete user linked to an active cart", async ({
+      request,
+    }) => {
+      const { token: clientToken, id: clientId } =
+        await setupHelper.createAndLogin("false");
+
+      const productController = new ProductController(request);
+      const product = new ProductBuilder().build();
+      const prodResponse = await productController.createProduct(
+        product,
+        admToken,
+      );
+      const prodId = (await prodResponse.json())._id;
+      setupHelper.addProductId(prodId);
+
+      const cartController = new CartController(request);
+      const cartPayload = new CartBuilder().addProduct(prodId, 1).build();
+      await cartController.createCart(cartPayload, clientToken);
+
+      const response = await userController.deleteUser(clientId, admToken);
+
+      expect(response.status()).toBe(400);
+      const responseBody = await response.json();
+      expect(responseBody).toHaveProperty(
+        "message",
+        "Não é permitido excluir usuário com carrinho cadastrado",
+      );
+
+      await cartController.cancelPurchase(clientToken);
     });
   });
 });
