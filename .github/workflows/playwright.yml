@@ -75,19 +75,15 @@ jobs:
         run: |
           git clone https://github.com/ServeRest/front.git front-serverest
           cd front-serverest
-
-          echo "REACT_APP_API_URL=http://127.0.0.1:3000" > .env
-          echo "REACT_APP_BASE_URL=http://127.0.0.1:3000" >> .env
-
           npm install
-          npm start &
+          REACT_APP_API_URL="http://localhost:3000" npm start &
           npx wait-on http://localhost:3001
 
       - name: Executar os Testes de UI
         run: npx playwright test
         env:
-          API_URL: "http://127.0.0.1:3000"
-          FRONT_URL: "http://127.0.0.1:3001"
+          API_URL: "http://localhost:3000"
+          FRONT_URL: "http://localhost:3001"
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
