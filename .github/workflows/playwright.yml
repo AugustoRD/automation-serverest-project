@@ -75,6 +75,9 @@ jobs:
         run: |
           git clone https://github.com/ServeRest/front.git front-serverest
           cd front-serverest
+
+          echo "REACT_APP_API_URL=http://localhost:3000" > .env
+
           npm install
           npm start &
           npx wait-on http://localhost:3001
