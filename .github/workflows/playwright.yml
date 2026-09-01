@@ -5,8 +5,8 @@ on:
   pull_request:
     branches: [main, dev]
 jobs:
-  test:
-    timeout-minutes: 60
+  api-test:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
     services:
@@ -14,17 +14,77 @@ jobs:
         image: paulogoncalvesbh/serverest:latest
         ports:
           - 3000:3000
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Construir a Imagem Docker (Build)
-        run: docker build -t testes-api-serverest .
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      - name: Executar os Testes no Container (Run)
-        run: docker run --network host -e BASE_URL="http://localhost:3000" -v ${{ github.workspace }}/playwright-report:/app/playwright-report testes-api-serverest
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Executar os Testes de API
+        run: npx playwright test -c playwright.api.config.ts
+        env:
+          API_URL: http://localhost:3000
 
       - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  ui-test:
+    name: Testes de UI
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    needs: api-test
+
+    services:
+      serverest:
+        image: paulogoncalvesbh/serverest:latest
+        ports:
+          - 3000:3000
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar Navegadores do Playwright
+        run: npx playwright install --with-deps
+
+      - name: Subir o Frontend
+        env:
+          PORT: 3001
+          REACT_APP_API_URL: http://localhost:3000
+        run: |
+          git clone https://github.com/ServeRest/front.git front-serverest
+          cd front-serverest
+          npm install
+          npm start &
+          npx wait-on http://localhost:3001
+
+      - name: Executar os Testes de UI
+        run: npx playwright test
+        env:
+          API_URL: http://localhost:3000
+          FRONT_URL: http://localhost:3001
+
+        -name: Upload HTML report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

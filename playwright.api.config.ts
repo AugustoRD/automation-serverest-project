@@ -8,7 +8,7 @@ export default defineConfig({
   reporter: "html",
 
   use: {
-    baseURL: process.env.BASE_URL || "http://localhost:3000",
+    baseURL: process.env.API_URL,
 
     extraHTTPHeaders: {
       Accept: "application/json",
