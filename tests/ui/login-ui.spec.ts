@@ -1,58 +1,50 @@
-import {
-  test,
-  expect,
-  request as playwrightRequest,
-  APIRequestContext,
-} from "@playwright/test";
-import { LoginPage } from "../../src/pages/LoginPage";
-import { SetupHelper } from "../../src/helpers/setup.helper";
-import { UserBuilder } from "../../src/builders/user.builder";
+import { faker } from "@faker-js/faker";
+import { test, expect } from "../../src/fixtures/e2e.fixture";
+import { LoginMessages } from "../../src/pages/LoginPage";
 
 test.describe("Login UI Tests", () => {
-  let loginPage: LoginPage;
-  let setupHelper: SetupHelper;
-  let dynamicAdmin: any;
-  let admToken: string;
-  let apiContext: APIRequestContext;
-
-  test.beforeAll(async () => {
-    apiContext = await playwrightRequest.newContext({
-      baseURL: "http://localhost:3000",
-    });
-  });
-
-  test.afterAll(async () => {
-    await apiContext.dispose();
-  });
-
   test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-
-    setupHelper = new SetupHelper(apiContext);
-
-    dynamicAdmin = new UserBuilder().withAdministrador("true").build();
-
-    const response = await apiContext.post("/usuarios", { data: dynamicAdmin });
-    const responseBody = await response.json();
-
-    setupHelper.addUserId(responseBody._id);
-
-    const loginResponse = await apiContext.post("/login", {
-      data: { email: dynamicAdmin.email, password: dynamicAdmin.password },
-    });
-    admToken = (await loginResponse.json()).authorization;
-
     await page.goto("/login");
   });
 
-  test.afterEach(async () => {
-    await setupHelper.tearDown(admToken);
-  });
-
-  test("should login with admin valid credentials", async ({ page }) => {
-    await loginPage.login(dynamicAdmin.email, dynamicAdmin.password);
+  test("should login with admin valid credentials", async ({
+    page,
+    loginPage,
+    adminUser,
+  }) => {
+    await loginPage.login(adminUser.email, adminUser.password);
 
     await expect(page).toHaveURL(/\/admin\/home/);
     await expect(page.getByText("Bem Vindo")).toBeVisible();
+  });
+
+  test("should login with client valid credentials", async ({
+    page,
+    loginPage,
+    clientUser,
+  }) => {
+    await loginPage.login(clientUser.email, clientUser.password);
+
+    await expect(page).toHaveURL(/\/home/);
+    await expect(page.getByText("Serverest Store")).toBeVisible();
+  });
+
+  test("should not do login with nonexistent email", async ({ loginPage }) => {
+    await loginPage.login(faker.internet.email(), faker.internet.password());
+
+    await expect(loginPage.alertErrorMessage).toHaveText(
+      LoginMessages.INVALID_CREDENTIALS,
+    );
+  });
+
+  test("should not do login with invalid password", async ({
+    loginPage,
+    clientUser,
+  }) => {
+    await loginPage.login(clientUser.email, faker.internet.password());
+
+    await expect(loginPage.alertErrorMessage).toHaveText(
+      LoginMessages.INVALID_CREDENTIALS,
+    );
   });
 });

@@ -1,4 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+dotenv.config();
 
 /**
  * Read environment variables from file.
@@ -25,11 +27,10 @@ export default defineConfig({
   reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL: process.env.FRONT_URL,
 
-    /* Coleta de Evidências Automatizadas (Padrão Sênior) */
-    trace: "retain-on-failure", // Salva a "caixa preta" do teste inteiro se falhar
-    screenshot: "only-on-failure", // Tira um print exato do momento da falha
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
 
