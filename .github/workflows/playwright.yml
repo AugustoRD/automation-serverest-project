@@ -71,6 +71,7 @@ jobs:
         env:
           PORT: 3001
           REACT_APP_API_URL: http://localhost:3000
+          NODE_OPTIONS: --openssl-legacy-provider
         run: |
           git clone https://github.com/ServeRest/front.git front-serverest
           cd front-serverest
