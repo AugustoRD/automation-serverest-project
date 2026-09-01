@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-api-report
           path: playwright-report/
           retention-days: 30
 
@@ -82,12 +82,12 @@ jobs:
         run: npx playwright test
         env:
           API_URL: http://localhost:3000
-          FRONT_URL: http://localhost:3001
+          BASE_URL: http://localhost:3001
 
-        -name: Upload HTML report
+      - name: Upload HTML report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-ui-report
           path: playwright-report/
           retention-days: 30
