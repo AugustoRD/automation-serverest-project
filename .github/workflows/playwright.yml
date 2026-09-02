@@ -69,7 +69,7 @@ jobs:
 
       - name: Subir o Frontend
         run: |
-          docker run -d -p 3001:3001 -e HOST=0.0.0.0 -e PORT=3001 -e BROWSER=none -e CI=true --name front-app augustorodriguesrd/serverest-front:latest
+          docker run -d -p 3001:3001 -e HOST=0.0.0.0 -e PORT=3001 -e BROWSER=none -e CI=true -e NODE_OPTIONS=--openssl-legacy-provider --name front-app augustorodriguesrd/serverest-front:latest
 
           sleep 5
           docker logs front-app
