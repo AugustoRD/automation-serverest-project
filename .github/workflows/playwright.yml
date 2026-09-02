@@ -69,7 +69,7 @@ jobs:
 
       - name: Subir o Frontend
         run: |
-          docker run -d --name front-app --network host augustorodriguesrd/serverest-front:latest
+          docker run -d -p 3001:3001 -e HOST=0.0.0.0 --name front-app augustorodriguesrd/serverest-front:latest
           npx wait-on http://localhost:3001
 
       - name: Executar os Testes de UI
