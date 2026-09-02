@@ -69,8 +69,12 @@ jobs:
 
       - name: Subir o Frontend
         run: |
-          docker run -d -p 3001:3001 -e HOST=0.0.0.0 --name front-app augustorodriguesrd/serverest-front:latest
-          npx wait-on http://localhost:3001
+          docker run -d -p 3001:3001 -e HOST=0.0.0.0 -e PORT=3001 -e BROWSER=none -e CI=true --name front-app augustorodriguesrd/serverest-front:latest
+
+          sleep 5
+          docker logs front-app
+
+          npx -y wait-on -t 120000 http://127.0.0.1:3001
 
       - name: Executar os Testes de UI
         run: npx playwright test
