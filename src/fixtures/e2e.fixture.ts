@@ -1,9 +1,11 @@
 import { request as playwrightRequest } from "@playwright/test";
 import { test as apiTest } from "./api.fixture";
 import { LoginPage } from "../pages/LoginPage";
+import { ClientRegisterPage } from "../pages/ClientRegisterPage";
 
 type UiFixtures = {
   loginPage: LoginPage;
+  clientRegisterPage: ClientRegisterPage;
   adminUser: { email: string; password: string };
   clientUser: { email: string; password: string };
 };
@@ -35,6 +37,10 @@ export const test = apiTest.extend<UiFixtures>({
     await use({ email: clientUser.email, password: clientUser.password });
 
     await setupHelper.tearDown(clientUser.token);
+  },
+
+  clientRegisterPage: async ({ page }, use) => {
+    await use(new ClientRegisterPage(page));
   },
 });
 
