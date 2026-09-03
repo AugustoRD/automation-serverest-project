@@ -2,18 +2,10 @@ import { faker } from "@faker-js/faker";
 import { test, expect } from "../../src/fixtures/e2e.fixture";
 
 test.describe("Client Register UI Tests", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/cadastrarusuarios");
-  });
-
-  test.afterEach(async ({ setupHelper, admToken }) => {
-    await setupHelper.tearDown(admToken);
-  });
-
   test("should register a new client", async ({
     page,
     clientRegisterPage,
-    setupHelper,
+    autoCleanHelper,
   }) => {
     const responsePromise = page.waitForResponse(
       (response) =>
@@ -29,9 +21,26 @@ test.describe("Client Register UI Tests", () => {
     const response = await responsePromise;
     const responseBody = await response.json();
 
-    setupHelper.addUserId(responseBody._id);
+    autoCleanHelper.addUserId(responseBody._id);
 
     await expect(clientRegisterPage.alertSuccessMessage).toBeVisible();
     await expect(page).toHaveURL("/home");
+  });
+
+  test("should not register a new client with existing email", async ({
+    page,
+    clientRegisterPage,
+    autoCleanHelper,
+  }) => {
+    const existingUser = await autoCleanHelper.registerUser("false");
+
+    await clientRegisterPage.register(
+      faker.person.fullName(),
+      existingUser.email,
+      faker.internet.password(),
+    );
+
+    await expect(page).toHaveURL("/cadastrarusuarios");
+    await expect(clientRegisterPage.alertErrorMessage).toBeVisible();
   });
 });

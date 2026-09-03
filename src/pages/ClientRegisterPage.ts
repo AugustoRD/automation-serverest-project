@@ -9,6 +9,7 @@ export class ClientRegisterPage {
   // readonly confirmPasswordInput: Locator;
   readonly registerButton: Locator;
   readonly alertSuccessMessage: Locator;
+  readonly alertErrorMessage: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -20,6 +21,9 @@ export class ClientRegisterPage {
       "Cadastro realizado com sucesso",
       { exact: true },
     );
+    this.alertErrorMessage = page.getByText("Este email já está sendo usado", {
+      exact: true,
+    });
   }
 
   async register(name: string, email: string, password: string) {
