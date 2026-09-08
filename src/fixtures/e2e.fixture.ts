@@ -4,6 +4,7 @@ import { LoginPage } from "../pages/LoginPage";
 import { ClientRegisterPage } from "../pages/ClientRegisterPage";
 import { SetupHelper } from "../helpers/setup.helper";
 import { AdminRegisterPage } from "../pages/AdminRegisterPage";
+import { AdminListPage } from "../pages/AdminListPage";
 
 type UiFixtures = {
   loginPage: LoginPage;
@@ -12,6 +13,7 @@ type UiFixtures = {
   adminUser: { email: string; password: string };
   clientUser: { email: string; password: string };
   autoCleanHelper: SetupHelper;
+  adminListPage: AdminListPage;
 };
 
 export const test = apiTest.extend<UiFixtures>({
@@ -58,6 +60,18 @@ export const test = apiTest.extend<UiFixtures>({
     const adminRegisterPage = new AdminRegisterPage(page);
     await page.goto("/admin/cadastrarusuarios");
     await use(adminRegisterPage);
+  },
+
+  adminListPage: async ({ page, admToken }, use) => {
+    await page.goto("/login");
+    await page.evaluate((token) => {
+      localStorage.setItem("serverest/userToken", token);
+    }, admToken);
+
+    const adminListPage = new AdminListPage(page);
+    await page.goto("/admin/listarusuarios");
+
+    await use(adminListPage);
   },
 
   autoCleanHelper: async ({ request, admToken }, use) => {
