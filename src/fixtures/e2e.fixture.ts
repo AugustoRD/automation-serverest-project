@@ -5,6 +5,7 @@ import { ClientRegisterPage } from "../pages/ClientRegisterPage";
 import { SetupHelper } from "../helpers/setup.helper";
 import { AdminRegisterPage } from "../pages/AdminRegisterPage";
 import { AdminListPage } from "../pages/AdminListPage";
+import { E2E_ENDPOINTS } from "../constants/endpoints";
 
 type UiFixtures = {
   loginPage: LoginPage;
@@ -47,29 +48,29 @@ export const test = apiTest.extend<UiFixtures>({
 
   clientRegisterPage: async ({ page }, use) => {
     const clientRegisterPage = new ClientRegisterPage(page);
-    await page.goto("/cadastrarusuarios");
+    await page.goto(E2E_ENDPOINTS.CLIENT_REGISTER);
     await use(clientRegisterPage);
   },
 
   adminRegisterPage: async ({ page, admToken }, use) => {
-    await page.goto("/login");
+    await page.goto(E2E_ENDPOINTS.LOGIN);
     await page.evaluate((token) => {
       localStorage.setItem("serverest/userToken", token);
     }, admToken);
 
     const adminRegisterPage = new AdminRegisterPage(page);
-    await page.goto("/admin/cadastrarusuarios");
+    await page.goto(E2E_ENDPOINTS.ADM_REGISTER_USER);
     await use(adminRegisterPage);
   },
 
   adminListPage: async ({ page, admToken }, use) => {
-    await page.goto("/login");
+    await page.goto(E2E_ENDPOINTS.LOGIN);
     await page.evaluate((token) => {
       localStorage.setItem("serverest/userToken", token);
     }, admToken);
 
     const adminListPage = new AdminListPage(page);
-    await page.goto("/admin/listarusuarios");
+    await page.goto(E2E_ENDPOINTS.LIST_USERS);
 
     await use(adminListPage);
   },

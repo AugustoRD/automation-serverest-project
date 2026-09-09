@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { test, expect } from "../../src/fixtures/e2e.fixture";
+import { API_ENDPOINTS, E2E_ENDPOINTS } from "../../src/constants/endpoints";
 
 test.describe("Client Register UI Tests", () => {
   test("should register a new client", async ({
@@ -9,7 +10,8 @@ test.describe("Client Register UI Tests", () => {
   }) => {
     const responsePromise = page.waitForResponse(
       (response) =>
-        response.url().includes("/usuarios") && response.status() === 201,
+        response.url().includes(API_ENDPOINTS.USERS) &&
+        response.status() === 201,
     );
 
     await clientRegisterPage.register(
@@ -24,7 +26,7 @@ test.describe("Client Register UI Tests", () => {
     autoCleanHelper.addUserId(responseBody._id);
 
     await expect(clientRegisterPage.alertSuccessMessage).toBeVisible();
-    await expect(page).toHaveURL("/home");
+    await expect(page).toHaveURL(E2E_ENDPOINTS.HOME);
   });
 
   test("should not register a new client with existing email", async ({
@@ -40,7 +42,7 @@ test.describe("Client Register UI Tests", () => {
       faker.internet.password(),
     );
 
-    await expect(page).toHaveURL("/cadastrarusuarios");
+    await expect(page).toHaveURL(E2E_ENDPOINTS.CLIENT_REGISTER);
     await expect(clientRegisterPage.alertErrorMessage).toBeVisible();
   });
 });
